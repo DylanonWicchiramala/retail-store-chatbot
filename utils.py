@@ -2,6 +2,8 @@ from dotenv import load_dotenv as __load_dotenv
 import os
 import json
 import functools
+from pymongo.server_api import ServerApi
+from pymongo.mongo_client import MongoClient
 from typing import Any, List, Union, Tuple, Literal
 
 sound_effects = {
@@ -70,6 +72,20 @@ def bundle_input(func):
             return result
 
     return wrapper
+
+
+def load_retail_store_db():
+    load_env()
+    
+    # Load MongoDB credentials and set up the connection
+    mongo = os.environ.get('MONGODB_PASS')
+    uri = f"mongodb+srv://dylan:{mongo}@cluster0.wl8mbpy.mongodb.net/"
+    client = MongoClient(uri, server_api=ServerApi('1'))
+
+    # Connect to the "RetailStore" database
+    db = client["RetailStore"]
+    
+    return client, db
 
 
 def load_agent_meta():

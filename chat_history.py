@@ -13,10 +13,10 @@ utils.load_env()
 mongo = os.environ.get('MONGODB_PASS')
 uri = f"mongodb+srv://dylan:{mongo}@cluster0.wl8mbpy.mongodb.net/"
 
-
-# Create a new client and connect to the server
 client = MongoClient(uri, server_api=ServerApi('1'))
-db = client["FeasibilityAnalysis"]
+
+# Connect to the "RetailStore" database
+db = client["RetailStore"]
 history = db["Chat History"]
 
 

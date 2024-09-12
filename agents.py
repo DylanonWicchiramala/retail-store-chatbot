@@ -1,12 +1,5 @@
 from langchain_openai import ChatOpenAI
 from tools import (
-    find_place_from_text, 
-    nearby_search, 
-    nearby_dense_community, 
-    search_population_community_household_expenditures_data,
-    duckduckgo_search,
-    restaurant_sale_projection,
-    python_repl,
     all_tools
 )
 from langchain_core.messages import (
@@ -86,28 +79,12 @@ class AgentState(TypedDict):
 
 agent_name = list(agents.keys())
 
-analyst = agents['analyst']
-data_collector = agents['data_collector']
-reporter = agents['reporter']
+service = agents['service']
     
-analyst['node'] = create_agent(
+service['node'] = create_agent(
         llm,
-        [find_place_from_text, restaurant_sale_projection],
-        system_message=analyst['prompt'],
+        all_tools,
+        system_message=service['prompt'],
     )
 
-data_collector['node'] = create_agent(
-        llm,
-        [restaurant_sale_projection, search_population_community_household_expenditures_data, find_place_from_text, nearby_search, nearby_dense_community, duckduckgo_search] ,
-        system_message=data_collector['prompt'],
-    )
-
-reporter['node'] = create_agent(
-        llm,
-        [],
-        system_message=reporter['prompt'],
-    )
-
-analyst['node'] = functools.partial(agent_node, agent=analyst['node'], name='analyst')
-data_collector['node'] = functools.partial(agent_node, agent=data_collector['node'], name='data_collector')
-reporter['node'] = functools.partial(agent_node, agent=reporter['node'], name='reporter')
+service['node'] = functools.partial(agent_node, agent=service['node'], name='service')
