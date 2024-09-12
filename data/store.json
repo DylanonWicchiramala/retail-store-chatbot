@@ -1,0 +1,28 @@
+[
+    {
+    "_id": 1,
+    "name": "Central Mall Branch",
+    "branch_name": "Central Mall Branch",
+    "location": {
+      "address": "123 Main St, City, Province",
+      "latitude": 13.7563,
+      "longitude": 100.5018
+    },
+    "contact_info": {
+      "phone": "+1234567890",
+      "email": "central@example.com"
+    },
+    "products": [
+      {
+        "id":1,
+        "price":1200.99,
+        "stock":5
+      },
+      {
+        "id":2,
+        "price":56,
+        "stock":50000
+      }
+    ]
+  }
+]

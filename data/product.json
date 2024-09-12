@@ -1,0 +1,21 @@
+[
+    {
+    "_id": 1,
+    "product_name": "Laptop XYZ",
+    "description": "A high-performance laptop for gaming and work.",
+    "category": "Electronics",
+    "detail": {
+      "brand": "XYZ",
+      "model": "XYZ123",
+      "warranty": "1 year"
+    }
+  },
+  {
+    "_id": 2,
+    "product_name": "Apple",
+    "description": "Apple.",
+    "category": "Food",
+    "detail": {
+    }
+  }
+]
