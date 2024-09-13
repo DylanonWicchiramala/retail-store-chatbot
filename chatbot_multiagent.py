@@ -33,7 +33,7 @@ from typing import Literal
 tool_node = ToolNode(all_tools)
 
 
-def router(state) -> Literal["call_tool", "__end__", "data_collector", "reporter", "analyst"]:
+def router(state) -> Literal["call_tool", "__end__"]:
     # This is the router
     messages = state["messages"]
     last_message = messages[-1]
@@ -43,14 +43,8 @@ def router(state) -> Literal["call_tool", "__end__", "data_collector", "reporter
     if last_message.tool_calls:
         # The previous agent is invoking a tool
         return "call_tool"
-    if "data_collector" in last_message.content:
-        return "data_collector"
-    if "reporter" in last_message.content:
-        return "reporter"
-    if "analyst" in last_message.content:
-        return "analyst"
     else:
-        return "continue"
+        return "__end__"
 
 
 ## Workflow Graph ------------------------------------------------------------------------
@@ -64,33 +58,12 @@ workflow.add_node("call_tool", tool_node)
 
 
 workflow.add_conditional_edges(
-    "analyst",
-    router,
-    {
-        "data_collector":"data_collector",
-        "call_tool": "call_tool", 
-        "__end__": END,
-        "continue": "data_collector", 
-        }
-)
-
-workflow.add_conditional_edges(
-    "data_collector",
+    "service",
     router,
     {
         "call_tool": "call_tool", 
-        "reporter":"reporter",
-        "continue": "reporter", 
-        }
-)
-
-workflow.add_conditional_edges(
-    "reporter",
-    router,
-    {
         "__end__": END,
-        "data_collector":"data_collector",
-        "continue": "data_collector", 
+        "continue": END, 
         }
 )
 
@@ -104,7 +77,7 @@ workflow.add_conditional_edges(
     {name:name for name in agent_name},
 )
 
-workflow.add_edge(START, "analyst")
+workflow.add_edge(START, "service")
 graph = workflow.compile()
 
 def submitUserMessage(

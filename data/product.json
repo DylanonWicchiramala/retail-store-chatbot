@@ -1,5 +1,5 @@
 [
-    {
+  {
     "_id": 1,
     "product_name": "Laptop XYZ",
     "description": "A high-performance laptop for gaming and work.",
@@ -13,9 +13,146 @@
   {
     "_id": 2,
     "product_name": "Apple",
-    "description": "Apple.",
+    "description": "A fresh and crisp apple.",
     "category": "Food",
     "detail": {
+      "brand": "FarmFresh",
+      "model": "Red Delicious"
+    }
+  },
+  {
+    "_id": 3,
+    "product_name": "Smartphone Pro",
+    "description": "A flagship smartphone with cutting-edge features.",
+    "category": "Electronics",
+    "detail": {
+      "brand": "TechCorp",
+      "model": "ProMax",
+      "warranty": "2 years"
+    }
+  },
+  {
+    "_id": 4,
+    "product_name": "Running Shoes",
+    "description": "Comfortable running shoes designed for long-distance runs.",
+    "category": "Sportswear",
+    "detail": {
+      "brand": "SpeedX",
+      "model": "Racer 3000",
+      "warranty": "6 months"
+    }
+  },
+  {
+    "_id": 5,
+    "product_name": "Coffee Beans",
+    "description": "Premium roasted coffee beans from Colombia.",
+    "category": "Food",
+    "detail": {
+      "brand": "CafePure",
+      "model": "Colombian Roast"
+    }
+  },
+  {
+    "_id": 6,
+    "product_name": "Bluetooth Speaker",
+    "description": "Portable Bluetooth speaker with deep bass and clear sound.",
+    "category": "Electronics",
+    "detail": {
+      "brand": "SoundWave",
+      "model": "MiniBass",
+      "warranty": "1 year"
+    }
+  },
+  {
+    "_id": 7,
+    "product_name": "Yoga Mat",
+    "description": "Eco-friendly, non-slip yoga mat for a comfortable practice.",
+    "category": "Sportswear",
+    "detail": {
+      "brand": "FlexFit",
+      "model": "EcoMat 200",
+      "warranty": "1 year"
+    }
+  },
+  {
+    "_id": 8,
+    "product_name": "Organic Honey",
+    "description": "100% pure organic honey sourced from local farms.",
+    "category": "Food",
+    "detail": {
+      "brand": "SweetHarvest"
+    }
+  },
+  {
+    "_id": 9,
+    "product_name": "Gaming Chair",
+    "description": "Ergonomic gaming chair with adjustable height and lumbar support.",
+    "category": "Furniture",
+    "detail": {
+      "brand": "ComfortSeat",
+      "model": "GamerX 500",
+      "warranty": "2 years"
+    }
+  },
+  {
+    "_id": 10,
+    "product_name": "Water",
+    "description": "",
+    "category": "Drink",
+    "detail": {
+      "brand": "FIJI"
+    }
+  },
+  {
+    "_id": 11,
+    "product_name": "Organic Bananas",
+    "description": "A bunch of fresh organic bananas.",
+    "category": "Food",
+    "detail": {
+      "brand": "Nature's Best"
+    }
+  },
+  {
+    "_id": 12,
+    "product_name": "Wireless Earbuds",
+    "description": "Compact wireless earbuds with noise-cancellation.",
+    "category": "Electronics",
+    "detail": {
+      "brand": "AudioMaster",
+      "model": "ZenBuds",
+      "warranty": "6 months"
+    }
+  },
+  {
+    "_id": 13,
+    "product_name": "Water Bottle",
+    "description": "A reusable, BPA-free water bottle.",
+    "category": "Drink",
+    "detail": {
+      "brand": "EcoFlow",
+      "model": "HydroPro"
+    }
+  },
+  {
+    "_id": 14,
+    "product_name": "Running Shoes",
+    "description": "Lightweight running shoes designed for long-distance comfort.",
+    "category": "Sportswear",
+    "detail": {
+      "brand": "RunFast",
+      "model": "Speedster",
+      "warranty": "1 year"
+    }
+  },
+  {
+    "_id": 15,
+    "product_name": "Desk Chair",
+    "description": "Ergonomic desk chair for all-day comfort.",
+    "category": "Furniture",
+    "detail": {
+      "brand": "ComfortSeat",
+      "model": "ErgoFlex",
+      "warranty": "5 years"
     }
   }
 ]
