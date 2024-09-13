@@ -45,7 +45,7 @@ def save_tools_output(func):
     return wrapper
 
 
-def similarity_search(collection:pymongo.collection.Collection, query:str, embedding:OpenAIEmbeddings, k:int=4):
+def similarity_search(collection:pymongo.collection.Collection, query:str, embedding:OpenAIEmbeddings, k:int=4, include_score:bool=False):
     items = list(collection.find({"name": STORE_NAME}))
     for item in items:
         emb = item['embedding']
@@ -63,7 +63,7 @@ def similarity_search(collection:pymongo.collection.Collection, query:str, embed
     
     for item in sorted_items:
         del item['embedding']
-        del item['score'] 
+        if not include_score: del item['score'] 
 
     return sorted_items
 
