@@ -69,7 +69,7 @@ def similarity_search(collection:pymongo.collection.Collection, query:str, embed
 
 # %%
 @tool
-@save_tools_output
+# @save_tools_output
 def search_retail_store(query:str):
     """ search in retail store database.
     """
