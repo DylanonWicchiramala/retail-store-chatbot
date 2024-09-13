@@ -66,19 +66,21 @@ def similarity_search(collection:pymongo.collection.Collection, query:str, embed
     sorted_items = sorted(items, reverse=True, key=lambda d: d['score'])
 
     sorted_items = sorted_items[:k]
+    
+    for item in sorted_items:
+        del item['embedding']
+        del item['score'] 
 
     return sorted_items
 
 # %%
 @tool
 @save_tools_output
-def search_retail_data(query:str):
+def search_retail_store(query:str):
     """ search in retail store database.
     """
     items = similarity_search(stores_collection ,query, embedding=embedding, k=1)
     for item in items:
-        del item['embedding']
-        del item['score']
         for product in item['products']:
             detail = list(products_collection.find({"_id": product['id']}))[0]
             del detail['embedding']
@@ -98,4 +100,4 @@ def search_retail_data(query:str):
 #     return str(items)
 
 
-all_tools = [search_retail_data]
+all_tools = [search_retail_store]
