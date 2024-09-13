@@ -42,42 +42,6 @@
   },
   {
     "_id": 2,
-    "name": "7-ELEVEN",
-    "branch_name": "7-ELEVEN Sukhumvit Branch",
-    "location": {
-      "address": "129 Sukhumvit Rd, Klongtoey, Bangkok 10110",
-      "latitude": 13.736717,
-      "longitude": 100.523186
-    },
-    "contact_info": {
-      "phone": "+9876543210",
-      "email": "7eleven@example.com"
-    },
-    "products": [
-      {
-        "id": 2,
-        "price": 60,
-        "stock": 80
-      },
-      {
-        "id": 5,
-        "price": 150,
-        "stock": 150
-      },
-      {
-        "id": 6,
-        "price": 650,
-        "stock": 4
-      },
-      {
-        "id": 11,
-        "price": 8,
-        "stock": 43
-      }
-    ]
-  },
-  {
-    "_id": 3,
     "name": "Central Mall",
     "branch_name": "Central Pinklao",
     "location": {
@@ -124,6 +88,42 @@
         "id": 7,
         "price": 540,
         "stock": 231
+      }
+    ]
+  },
+  {
+    "_id": 3,
+    "name": "7-ELEVEN",
+    "branch_name": "7-ELEVEN Sukhumvit Branch",
+    "location": {
+      "address": "129 Sukhumvit Rd, Klongtoey, Bangkok 10110",
+      "latitude": 13.736717,
+      "longitude": 100.523186
+    },
+    "contact_info": {
+      "phone": "+9876543210",
+      "email": "7eleven@example.com"
+    },
+    "products": [
+      {
+        "id": 2,
+        "price": 60,
+        "stock": 80
+      },
+      {
+        "id": 5,
+        "price": 150,
+        "stock": 150
+      },
+      {
+        "id": 6,
+        "price": 650,
+        "stock": 4
+      },
+      {
+        "id": 11,
+        "price": 8,
+        "stock": 43
       }
     ]
   },
