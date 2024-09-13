@@ -74,7 +74,7 @@ def bundle_input(func):
     return wrapper
 
 
-def load_retail_store_db():
+def load_project_db():
     load_env()
     
     # Load MongoDB credentials and set up the connection

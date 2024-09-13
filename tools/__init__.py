@@ -1,12 +1,26 @@
 # %%
-from typing import TypedDict, Optional, NotRequired, Literal
-import utils
 ## Document vector store for context
 from langchain_core.tools import tool
 import functools
 from copy import copy
+## For database search tool
+from langchain_openai import OpenAIEmbeddings
+import pymongo.collection
+import numpy as np
+from numpy.linalg import norm
+from utils import load_project_db
+import os
 
-# utils.load_env()
+STORE_NAME = os.environ["STORE_NAME"]
+
+client, db = load_project_db()
+
+#! Retriever
+embedding = OpenAIEmbeddings(model="text-embedding-3-small")
+#? Vector store
+products_collection = db["Products"]
+stores_collection = db["Stores"]
+
 
 tools_outputs=""
 
@@ -29,26 +43,6 @@ def save_tools_output(func):
         # Return the original result
         return result
     return wrapper
-
-# %%
-## search_db.py
-# from langchain_mongodb.vectorstores import MongoDBAtlasVectorSearch
-from langchain_openai import OpenAIEmbeddings
-import pymongo.collection
-import numpy as np
-from numpy.linalg import norm
-from utils import load_retail_store_db
-import os
-
-STORE_NAME = os.environ["STORE_NAME"]
-
-client, db = load_retail_store_db()
-
-#! Retriever
-embedding = OpenAIEmbeddings(model="text-embedding-3-small")
-#? Vector store
-products_collection = db["Products"]
-stores_collection = db["Stores"]
 
 
 def similarity_search(collection:pymongo.collection.Collection, query:str, embedding:OpenAIEmbeddings, k:int=4):
