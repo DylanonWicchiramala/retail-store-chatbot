@@ -92,7 +92,7 @@ def submitUserMessage(
     chat_history = load_chat_history(user_id=user_id) if keep_chat_history else []
     chat_history = chat_history[-8:]
     
-    # memory only keep chat history only along agents.
+    # memory only keep chat history along agents.
     internal_level_memory = MemorySaver()
     graph = workflow.compile(checkpointer=internal_level_memory)
 

@@ -5,11 +5,11 @@ sys.path.append(dirname(realpath(__file__)) + sep + pardir)
 
 import json
 import pymongo
-from utils import load_retail_store_db
+from utils import load_project_db
 from langchain_mongodb.vectorstores import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
 
-client, db = load_retail_store_db()
+client, db = load_project_db()
 
 # Define the collections
 stores_collection = db["Stores"]

@@ -10,12 +10,8 @@ from datetime import datetime, timedelta
 
 utils.load_env()
 
-mongo = os.environ.get('MONGODB_PASS')
-uri = f"mongodb+srv://dylan:{mongo}@cluster0.wl8mbpy.mongodb.net/"
-
-client = MongoClient(uri, server_api=ServerApi('1'))
-
 # Connect to the "RetailStore" database
+client, db = utils.load_project_db()
 db = client["RetailStore"]
 history = db["Chat History"]
 
