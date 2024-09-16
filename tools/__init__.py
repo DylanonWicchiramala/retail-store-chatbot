@@ -4,8 +4,12 @@ from langchain_core.tools import tool
 import functools
 from copy import copy
 ## For database search tool
-from retail_store_data import (
+from tools.retail_store_data import (
     search_retail_store
+)
+from tools.customer_data import (
+    get_customer_information,
+    save_customer_information
 )
 
 tools_outputs=""
@@ -31,6 +35,12 @@ def save_tools_output(func):
     return wrapper
 
 
+get_customer_information = tool(get_customer_information)
+save_customer_information = tool(save_customer_information)
 search_retail_store = tool(search_retail_store)
 
-all_tools = [search_retail_store]
+all_tools = [
+    get_customer_information,
+    save_customer_information,
+    search_retail_store,
+    ]

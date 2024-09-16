@@ -17,11 +17,11 @@ class CustomerInformationInput(TypedDict):
     name: NotRequired[str]
     age: NotRequired[int]
     gender: NotRequired[str]
+    special_occasions: NotRequired[str]
+    price_sensitivity: NotRequired[str]
     hobbies_interests: NotRequired[str]
     preferred_products_categories: NotRequired[str]
     preferred_brands: NotRequired[str]
-    price_sensitivity: NotRequired[str]
-    special_occasions: NotRequired[str]
 
 
 def similarity_search(collection:pymongo.collection.Collection, query:str, embedding:OpenAIEmbeddings, k:int=4, include_score:bool=False):
@@ -48,33 +48,45 @@ def similarity_search(collection:pymongo.collection.Collection, query:str, embed
 
 
 def save_customer_information(input_dict:CustomerInformationInput):
-    input_dict
-
-
-def search_retail_store(query:str):
-    """ search in retail store database.
+    """ this function to save customers persona data and interests into the databases.
     """
     # get database
     client, db = load_project_db()
-    costomer_collection = db["Products"]
-    stores_collection = db["Stores"]
+    costomer_collection = db["Customer"]
     
-    items = similarity_search(stores_collection ,query, embedding=embedding, k=1)
-    for item in items:
-        for product in item['products']:
-            detail = list(products_collection.find({"_id": product['id']}))[0]
-            del detail['embedding']
-            product = product.update( detail )
-            
+    CURRENT_USER_ID = os.environ["CURRENT_USER_ID"]
+    
+    # Update the document in MongoDB
+    costomer_collection.update_one(
+        {"user_id": CURRENT_USER_ID},
+        {"$set": 
+            input_dict
+        },
+        upsert=True  # Create a new document if no matching document is found
+    )
+    
     client.close()
-    return str(items)
+    
+    return get_customer_information()
     
 
-# def search_product_data(query:str):
-#     """ search in product database.
-#     """
-#     items = similarity_search(products_collection ,query, embedding=embedding, k=1)
-#     for item in items:
-#         del item['embedding']
-#         del item['score']
-#     return str(items)
+def get_customer_information():
+    """ this function to get customers persona data and interests into the databases.
+    """
+    # get database
+    client, db = load_project_db()
+    costomer_collection = db["Customer"]
+    
+    CURRENT_USER_ID = os.environ["CURRENT_USER_ID"]
+    
+    # Update the document in MongoDB
+    persona = costomer_collection.find_one(
+        {"user_id": CURRENT_USER_ID}
+    )
+    
+    client.close()
+    
+    if persona:
+        return dict(persona)
+    else:
+        return None
