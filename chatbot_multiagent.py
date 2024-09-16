@@ -1,6 +1,5 @@
 # load env ------------------------------------------------------------------------
 import os
-from . import agents
 import utils
 
 utils.load_env()
@@ -20,7 +19,8 @@ from langchain_core.messages import (
 from langgraph.graph import END, StateGraph, START
 from agents import(
     AgentState,
-    agent_name
+    agents_metadata,
+    agent_names
 )
 from tools import get_tools_output, all_tools
 from chat_history import save_chat_history, load_chat_history
@@ -32,38 +32,61 @@ from typing import Literal
 
 tool_node = ToolNode(all_tools)
 
-
-def router(state) -> Literal["call_tool", "__end__"]:
+def router(state) -> Literal["call_tool", "continue", "supervisor", "creative_communication_agent", "crm_agent", "__end__"]:
     # This is the router
     messages = state["messages"]
     last_message = messages[-1]
     if "FINALANSWER" in last_message.content:
-        # Any agent decided the work is done
         return "__end__"
+    if "supervisor" in last_message.content:
+        return "supervisor"
+    if "creative_communication_agent" in last_message.content:
+        return "creative_communication_agent"
+    if "crm_agent" in last_message.content:
+        return "crm_agent"
     if last_message.tool_calls:
         # The previous agent is invoking a tool
         return "call_tool"
     else:
-        return "__end__"
+        return "continue"
 
 
 ## Workflow Graph ------------------------------------------------------------------------
 workflow = StateGraph(AgentState)
 
 # add agent nodes
-for name, value in agents.items():
+for name, value in agents_metadata.items():
     workflow.add_node(name, value['node'])
     
 workflow.add_node("call_tool", tool_node)
 
-
 workflow.add_conditional_edges(
-    "service",
+    "supervisor",
     router,
     {
-        "call_tool": "call_tool", 
+        "crm_agent":"crm_agent",
+        "creative_communication_agent":"creative_communication_agent",
+        "call_tool": "call_tool",
         "__end__": END,
         "continue": END, 
+        }
+)
+
+workflow.add_conditional_edges(
+    "creative_communication_agent",
+    router,
+    {
+        "call_tool": "call_tool",
+        "continue": "supervisor", 
+        }
+)
+
+workflow.add_conditional_edges(
+    "crm_agent",
+    router,
+    {
+        "call_tool": "call_tool",
+        "continue": "supervisor", 
         }
 )
 
@@ -74,10 +97,10 @@ workflow.add_conditional_edges(
     # this edge will route back to the original agent
     # who invoked the tool
     lambda x: x["sender"],
-    {name:name for name in agent_name},
+    {name:name for name in agent_names},
 )
 
-workflow.add_edge(START, "service")
+workflow.add_edge(START, "supervisor")
 graph = workflow.compile()
 
 def submitUserMessage(
@@ -89,10 +112,12 @@ def submitUserMessage(
     recursion_limit:int=20
     ) -> str:
     
-    chat_history = load_chat_history(user_id=user_id) if keep_chat_history else []
-    chat_history = chat_history[-8:]
+    os.environ['CURRENT_USER_ID'] = user_id
     
-    # memory only keep chat history along agents.
+    chat_history = load_chat_history(user_id=user_id) if keep_chat_history else []
+    chat_history = chat_history[-20:]
+    
+    # memory only keep chat history only along agents.
     internal_level_memory = MemorySaver()
     graph = workflow.compile(checkpointer=internal_level_memory)
 
@@ -120,9 +145,7 @@ def submitUserMessage(
         response = a[1]
     
     response = response["messages"][0].content
-    response = response.replace("FINALANSWER:", "")
-    response = response.replace("FINALANSWER,", "")
-    response = response.replace("FINALANSWER", "")
+    response = utils.format_bot_response(response, markdown=True)
     
     if keep_chat_history:
         save_chat_history(bot_message=response, human_message=user_input, user_id=user_id)
