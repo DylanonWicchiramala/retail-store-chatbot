@@ -15,26 +15,31 @@
     "products": [
       {
         "id": 1,
+        "product_name": "Laptop XYZ",
         "price": 12000.99,
         "stock": 5
       },
       {
         "id": 2,
+        "product_name": "Apple",
         "price": 56,
         "stock": 50000
       },      
       {
         "id": 3,
+        "product_name": "Smartphone Pro",
         "price": 56000,
         "stock": 150
       },
       {
         "id": 14,
+        "product_name": "Running Shoes",
         "price": 8000,
         "stock": 90
       },
       {
         "id": 15,
+        "product_name": "Desk Chair",
         "price": 15000,
         "stock": 13
       }
@@ -56,21 +61,25 @@
     "products": [
       {
         "id": 2,
+        "product_name": "Apple",
         "price": 60,
         "stock": 80
       },
       {
         "id": 5,
+        "product_name": "Coffee Beans",
         "price": 150,
         "stock": 150
       },
       {
         "id": 6,
+        "product_name": "Bluetooth Speaker",
         "price": 650,
         "stock": 4
       },
       {
         "id": 11,
+        "product_name": "Organic Bananas",
         "price": 8,
         "stock": 43
       }
@@ -92,36 +101,43 @@
     "products": [
       {
         "id": 3,
+        "product_name": "Smartphone Pro",
         "price": 29999.99,
         "stock": 10
       },
       {
         "id": 6,
+        "product_name": "Bluetooth Speaker",
         "price": 10.50,
         "stock": 300
       },
       {
         "id": 1,
+        "product_name": "Laptop XYZ",
         "price": 13500,
         "stock": 5
       },
       {
         "id": 2,
+        "product_name": "Apple",
         "price": 50,
         "stock": 6
       },
       {
         "id": 9,
+        "product_name": "Gaming Chair",
         "price": 5000,
         "stock": 6
       },
       {
         "id": 8,
+        "product_name": "Organic Honey",
         "price": 150,
         "stock": 69
       },
       {
         "id": 7,
+        "product_name": "Yoga Mat",
         "price": 540,
         "stock": 231
       }
@@ -143,26 +159,31 @@
     "products": [
       {
         "id": 4,
+        "product_name": "Running Shoes",
         "price": 35,
         "stock": 2000
       },
       {
         "id": 8,
+        "product_name": "Organic Honey",
         "price": 1500,
         "stock": 20
       },
       {
         "id": 10,
+        "product_name": "Water",
         "price": 15,
         "stock": 4003
       },
       {
         "id": 11,
+        "product_name": "Organic Bananas",
         "price": 7,
         "stock": 403
       },
       {
         "id": 12,
+        "product_name": "Wireless Earbuds",
         "price": 699,
         "stock": 8
       }
