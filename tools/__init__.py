@@ -45,7 +45,7 @@ def save_tools_output(func):
     return wrapper
 
 
-def similarity_search(collection:pymongo.collection.Collection, query:str, embedding:OpenAIEmbeddings, k:int=4, include_score:bool=False):
+def similarity_search(collection:pymongo.collection.Collection, query:str, embedding:OpenAIEmbeddings, k:int=4, threshold:float=0.55, include_score:bool=False):
     items = list(collection.find({"name": STORE_NAME}))
     for item in items:
         emb = item['embedding']
@@ -57,7 +57,9 @@ def similarity_search(collection:pymongo.collection.Collection, query:str, embed
         
         item['score']=cosine
 
-    sorted_items = sorted(items, reverse=True, key=lambda d: d['score'])
+    filtered_items = filter(lambda d: d['score']>=threshold, items)
+    
+    sorted_items = sorted(filtered_items, reverse=True, key=lambda d: d['score'])
 
     sorted_items = sorted_items[:k]
     
