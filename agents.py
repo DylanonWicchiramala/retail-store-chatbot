@@ -13,7 +13,7 @@ import operator
 from typing import Annotated, Sequence, TypedDict, List
 from prompt import (
     system_prompt,
-    agent_meta as agents
+    agents
 )
 import functools
 
@@ -79,12 +79,11 @@ class AgentState(TypedDict):
 
 agent_name = list(agents.keys())
 
-service = agents['service']
-    
-service['node'] = create_agent(
-        llm,
-        all_tools,
-        system_message=service['prompt'],
-    )
+for name in agent_name:
+    agents[name]['node'] = create_agent(
+            llm,
+            agents[name]['tools'],
+            system_message=agents[name]['prompt'],
+        )
 
-service['node'] = functools.partial(agent_node, agent=service['node'], name='service')
+    agents[name]['node'] = functools.partial(agent_node, agent=agents[name]['node'], name=name)

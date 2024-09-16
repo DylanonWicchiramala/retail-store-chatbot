@@ -115,6 +115,9 @@ def strip(text:str):
 
 @bundle_input
 def format_bot_response(text:str, markdown:bool=True):
+    text = text.replace("FINALANSWER:", "")
+    text = text.replace("FINALANSWER,", "")
+    text = text.replace("FINALANSWER", "")
     text = remove_markdown(text) if not markdown else text
     text = strip(text)
     return text
