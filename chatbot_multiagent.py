@@ -1,5 +1,6 @@
 # load env ------------------------------------------------------------------------
 import os
+from . import agents
 import utils
 
 utils.load_env()
@@ -19,7 +20,6 @@ from langchain_core.messages import (
 from langgraph.graph import END, StateGraph, START
 from agents import(
     AgentState,
-    agents,
     agent_name
 )
 from tools import get_tools_output, all_tools

@@ -8,7 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 import operator
 from typing import Annotated, Sequence, TypedDict, List
-from prompt import (
+from agents.metadata import (
     system_prompt,
     agents
 )

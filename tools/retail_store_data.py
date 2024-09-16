@@ -1,6 +1,6 @@
 ## For database search tool
 from langchain_openai import OpenAIEmbeddings
-from mongodb_search import similarity_search
+from tools.mongodb_search import similarity_search
 from utils import load_project_db
 
 #! Retriever
