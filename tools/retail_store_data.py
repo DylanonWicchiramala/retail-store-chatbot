@@ -1,39 +1,10 @@
 ## For database search tool
 from langchain_openai import OpenAIEmbeddings
-import pymongo.collection
-import numpy as np
-from numpy.linalg import norm
+from mongodb_search import similarity_search
 from utils import load_project_db
-import os
-
-STORE_NAME = os.environ["STORE_NAME"]
 
 #! Retriever
 embedding = OpenAIEmbeddings(model="text-embedding-3-small")
-
-
-def similarity_search(collection:pymongo.collection.Collection, query:str, embedding:OpenAIEmbeddings, k:int=4, include_score:bool=False):
-    items = list(collection.find({"name": STORE_NAME}))
-    for item in items:
-        emb = item['embedding']
-
-        a = emb
-        b = embedding.embed_query(query)
-
-        cosine = np.dot(a,b)/(norm(a)*norm(b))
-        
-        item['score']=cosine
-
-    sorted_items = sorted(items, reverse=True, key=lambda d: d['score'])
-
-    sorted_items = sorted_items[:k]
-    
-    for item in sorted_items:
-        del item['embedding']
-        if not include_score: del item['score'] 
-
-    return sorted_items
-
 
 def search_retail_store(query:str):
     """ search in retail store database.
