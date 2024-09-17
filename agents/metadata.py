@@ -25,7 +25,7 @@ agents_metadata = {
         
         - Firstly, forward the user question to the CRM Agent to extract relevant human customer data from their message. Attch your message with 'crm_agent' so they will know the reciver.
         - Once you receive the human customer data from the CRM Agent, forward it to the Creative Communication Agent for crafting personalized messages or advertising strategies. Attch your message with 'creative_communication_agent' so they will know the reciver.
-        - After receiving responses from the CRM and Creative Communication Agents, consolidate the results and deliver the final message back to the human customer. Attch your message with 'FINALANSWER' to send your answer to human human customer.
+        - After receiving responses from the CRM and Creative Communication Agents, consolidate the results and deliver the final response back to the human customer. Attch your message with 'FINALANSWER' to send your answer to human human customer.
         
         - Ensure communication with both CRM and Creative Communication Agents is clear and that they have all necessary details from the human customer. All final messages to the human customer should align with their preferences and lifestyle.
         - To communicate with ether CRM and Creative Communication Agents attch your message with their names 'creative_communication_agent', 'crm_agent' (they are not tools). 
