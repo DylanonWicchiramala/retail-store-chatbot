@@ -32,6 +32,7 @@ def save_chat_history(bot_message:str, human_message:str, user_id: str = "test")
         }},
         upsert=True  # Create a new document if no matching document is found
     )
+    return load_chat_history(user_id=user_id)
     
     
 def load_chat_history(chat_history:list=[], user_id:str="test"):
@@ -89,5 +90,5 @@ def delete_chat_history(user_id=None, time_before=None, delete_all=False):
 
 
 # delete chat history older than 30 days.
-delete_chat_history(time_before=datetime.now() - timedelta(days=3))
-delete_chat_history(user_id="test")
+# delete_chat_history(time_before=datetime.now() - timedelta(days=14))
+# delete_chat_history(user_id="test", time_before=datetime.now() - timedelta(days=1))

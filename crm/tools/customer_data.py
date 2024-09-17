@@ -1,6 +1,6 @@
 ## For database search tool
 from typing import TypedDict, Optional, NotRequired, Literal
-from utils import load_project_db
+from crm.utils import load_project_db
 import os
 
 
@@ -57,4 +57,5 @@ def get_customer_information():
     if persona:
         return dict(persona)
     else:
-        return None
+        return 'No data'
+    
