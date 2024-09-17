@@ -37,7 +37,7 @@ def save_customer_information(input_dict:CustomerInformationInput):
     
     return get_customer_information()
     
-
+## depre
 def get_customer_information():
     """ this function to get customers persona data and interests into the databases.
     """
@@ -58,4 +58,23 @@ def get_customer_information():
         return dict(persona)
     else:
         return 'No data'
+
+
+def get_customer_information_by_id(user_id:str):
+    """ this function to get customers persona data and interests into the databases.
+    """
+    # get database
+    client, db = load_project_db()
+    costomer_collection = db["Customer"]
     
+    # Update the document in MongoDB
+    persona = costomer_collection.find_one(
+        {"user_id": user_id.strip()}
+    )
+    
+    client.close()
+    
+    if persona:
+        return dict(persona)
+    else:
+        return 'No data'

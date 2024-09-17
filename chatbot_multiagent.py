@@ -126,7 +126,8 @@ def submitUserMessage(
     
     if keep_chat_history:
         chat_history = save_chat_history(bot_message=response, human_message=user_input, user_id=user_id)
-        crm.listening_chat_history(chat_history[-2:], user_id=user_id)
+        crm.listening_chat_history(chat_history[-2:], user_id=user_id, verbose=verbose)
+        crm.create_personalized_ads(user_id=user_id, verbose=verbose)
     
     if return_reference:
         return response, get_tools_output()

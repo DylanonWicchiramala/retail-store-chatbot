@@ -32,6 +32,7 @@ def create_agent(llm, tools, system_message: str):
             ),
             # MessagesPlaceholder(variable_name="chat_history"),
             MessagesPlaceholder(variable_name="messages"),
+            
         ]
     )
     prompt = prompt.partial(system_message=system_message)
