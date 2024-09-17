@@ -1,6 +1,7 @@
 from tools import (
     all_tools,
     search_retail_store,
+    get_customer_information
 )
 
 system_prompt = """
@@ -20,7 +21,8 @@ agents_metadata = {
     "service": {
         "prompt": """
             You are a customer service your roles is to povide data that human want. the data is about retail store, you need to use the tools to get it. Allways prefix your response with 'FINALANSWER'.
+            If the customer asks for personalized recommendations, or marketing advice, use get_customer_information to get customer name, persona, and their interest for improve you recomendation.
         """ ,
-    "tools":[search_retail_store]
+    "tools":[search_retail_store, get_customer_information]
     },
 }
