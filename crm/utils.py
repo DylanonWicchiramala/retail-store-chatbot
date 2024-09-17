@@ -88,12 +88,6 @@ def load_project_db():
     return client, db
 
 
-def load_agent_meta():
-    with open('./prompt.json', 'r') as file:
-        prompt_data = json.load(file)
-    return prompt_data
-
-
 def load_env():
     # Load environment variables from the .env file
     return __load_dotenv("./.env") 

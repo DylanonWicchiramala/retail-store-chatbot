@@ -39,7 +39,7 @@ def QA_sample_test(quesion_test:list[str], result_save_path='test/testset/QA_tes
     result = []
     for quesion in sample_quesion:
         try:
-            answer = submitUserMessage(quesion, keep_chat_history=False)
+            answer = submitUserMessage(quesion, keep_chat_history=True)
             print("Response: ", answer[:100].replace("\n", " "), "...")
             result.append({'quesion': quesion, 'answer': answer})   
         except Exception as e:
@@ -92,4 +92,4 @@ endpoint="https://market-feasibility-analysis-chatbot-212399072243.asia-east1.ru
 # endpoint="http://127.0.0.1:8080/test"
 
 # results, exet_rept = API_test(quesion_test, num_samples=10, result_save_path='test/testset/api_QA_test_result.txt', endpoint=endpoint); utils.notify("aurora")
-results, exet_rept = QA_sample_test(quesion_test, num_samples=3, result_save_path="test/testset/QA_test_result.txt"); utils.notify("aurora")
+results, exet_rept = QA_sample_test(quesion_test, num_samples=10, result_save_path="test/testset/QA_test_result.txt"); utils.notify("aurora")

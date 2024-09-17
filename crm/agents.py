@@ -1,7 +1,4 @@
 from langchain_openai import ChatOpenAI
-from tools import (
-    all_tools
-)
 from langchain_core.messages import (
     AIMessage, 
     BaseMessage,
@@ -11,9 +8,9 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 import operator
 from typing import Annotated, Sequence, TypedDict, List
-from prompt import (
+from crm.metadata import (
     system_prompt,
-    agent_meta as agents
+    agent_metadata
 )
 import functools
 
@@ -33,11 +30,12 @@ def create_agent(llm, tools, system_message: str):
                 "system",
                 system_prompt,
             ),
-            MessagesPlaceholder(variable_name="chat_history"),
+            # MessagesPlaceholder(variable_name="chat_history"),
             MessagesPlaceholder(variable_name="messages"),
         ]
     )
     prompt = prompt.partial(system_message=system_message)
+    prompt = prompt.partial(agent_names=agent_names)
     
     # return llm without tools
     if tools:
@@ -77,14 +75,13 @@ class AgentState(TypedDict):
     sender: str
 
 
-agent_name = list(agents.keys())
+agent_names = list(agent_metadata.keys())
 
-service = agents['service']
-    
-service['node'] = create_agent(
-        llm,
-        all_tools,
-        system_message=service['prompt'],
-    )
+for name in agent_names:
+    agent_metadata[name]['llm'] = create_agent(
+            llm,
+            agent_metadata[name]['tools'],
+            system_message=agent_metadata[name]['prompt'],
+        )
 
-service['node'] = functools.partial(agent_node, agent=service['node'], name='service')
+    agent_metadata[name]['node'] = functools.partial(agent_node, agent=agent_metadata[name]['llm'], name=name)

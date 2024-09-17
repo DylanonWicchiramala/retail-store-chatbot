@@ -1,6 +1,10 @@
+# from os.path import dirname, realpath, sep, pardir, curdir
+# import sys
+# sys.path.append(dirname(realpath(__file__)) + sep + pardir)
+
 # load env ------------------------------------------------------------------------
 import os
-import utils
+import crm.utils as utils
 
 utils.load_env()
 os.environ['LANGCHAIN_TRACING_V2'] = "false"
@@ -17,16 +21,15 @@ from langchain_core.messages import (
     ToolMessage
 )
 from langgraph.graph import END, StateGraph, START
-from agents import(
+from crm.agents import(
     AgentState,
-    agents_metadata,
+    agent_metadata,
     agent_names
 )
+from crm.tools import all_tools
+from crm.chat_history import load_chat_history
 from langgraph.checkpoint.memory import MemorySaver
 
-from tools import get_tools_output, all_tools
-from chat_history import save_chat_history, load_chat_history
-import crm
 ## Define Tool Node
 from langgraph.prebuilt import ToolNode
 from typing import Literal
@@ -50,13 +53,13 @@ def router(state) -> Literal["call_tool", "continue", "__end__"]:
 workflow = StateGraph(AgentState)
 
 # add agent nodes
-for name, value in agents_metadata.items():
+for name, value in agent_metadata.items():
     workflow.add_node(name, value['node'])
     
 workflow.add_node("call_tool", tool_node)
 
 workflow.add_conditional_edges(
-    "service",
+    "crm_agent",
     router,
     {
         "call_tool": "call_tool",
@@ -75,37 +78,40 @@ workflow.add_conditional_edges(
     {name:name for name in agent_names},
 )
 
-workflow.add_edge(START, "service")
-graph = workflow.compile()
+workflow.add_edge(START, "crm_agent")
 
-def submitUserMessage(
-    user_input:str, 
+
+def format_chat_history_to_str(history:list[AIMessage|HumanMessage])->str:
+    history_str = ""
+    for chat in history:
+        if isinstance(chat, HumanMessage):
+            history_str += "Human: "+ chat.content.strip() + "\n"
+        if isinstance(chat, AIMessage):
+            history_str += "AI: "+ chat.content[:50].replace("\n","\t").strip() + "...\n"
+    
+    if history_str:
+        return history_str
+    else:
+        return "--Empty chat history--"
+    
+
+def __submitMessage(
+    input:str, 
     user_id:str="test", 
-    keep_chat_history:bool=False, 
-    return_reference:bool=False, 
     verbose:bool=False,
-    recursion_limit:int=20
+    recursion_limit:int=10
     ) -> str:
     
     os.environ['CURRENT_USER_ID'] = user_id
     
-    chat_history = load_chat_history(user_id=user_id) if keep_chat_history else []
-    chat_history = chat_history[-20:]
-    
     # memory only keep chat history only along agents.
-    # internal_level_memory = MemorySaver()
-    # graph = workflow.compile(checkpointer=internal_level_memory)
-    
-    graph = workflow.compile()
+    internal_level_memory = MemorySaver()
+    graph = workflow.compile(checkpointer=internal_level_memory)
 
     events = graph.stream(
         {
-            "messages": [
-                HumanMessage(
-                    user_input
-                )
-            ],
-            "chat_history": chat_history
+            "messages": [input]
+            # "chat_history": input
         },
         # Maximum number of steps to take in the graph
         {"recursion_limit": recursion_limit, "thread_id":"a"},
@@ -124,11 +130,19 @@ def submitUserMessage(
     response = response["messages"][0].content
     response = utils.format_bot_response(response, markdown=True)
     
-    if keep_chat_history:
-        chat_history = save_chat_history(bot_message=response, human_message=user_input, user_id=user_id)
-        crm.listening_chat_history(chat_history[-2:], user_id=user_id)
-    
-    if return_reference:
-        return response, get_tools_output()
-    else:
-        return response
+    return response
+
+
+def listening_chat_history_from_db(user_id:str, verbose=False):
+    chat_history = load_chat_history(user_id=user_id)
+    chat_history = format_chat_history_to_str(chat_history)
+    bot_response = __submitMessage(input=chat_history, user_id=user_id, verbose=verbose)
+
+    return bot_response
+
+
+def listening_chat_history(chat_history:list[AIMessage|HumanMessage], user_id:str, verbose=False):
+    chat_history = format_chat_history_to_str(chat_history)
+    bot_response = __submitMessage(input=chat_history, user_id=user_id, verbose=verbose)
+
+    return bot_response
