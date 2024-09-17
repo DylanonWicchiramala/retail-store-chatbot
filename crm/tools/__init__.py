@@ -3,15 +3,20 @@
 from langchain_core.tools import tool
 ## For database search tool
 from crm.tools.customer_data import (
-    get_customer_information,
+    get_customer_information_by_id,
     save_customer_information
+)
+from crm.tools.retail_store_data import (
+    search_retail_store
 )
 
 
-get_customer_information = tool(get_customer_information)
 save_customer_information = tool(save_customer_information)
+get_customer_information_by_id = tool(get_customer_information_by_id)
+search_retail_store=tool(search_retail_store)
 
 all_tools = [
-    get_customer_information,
     save_customer_information,
+    get_customer_information_by_id,
+    search_retail_store,
     ]    

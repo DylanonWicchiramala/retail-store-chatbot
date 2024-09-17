@@ -26,7 +26,9 @@ from crm.agents import(
     agent_metadata,
     agent_names
 )
+import crm.ads_database as ads_database
 from crm.tools import all_tools
+from crm.tools.customer_data import get_customer_information_by_id
 from crm.chat_history import load_chat_history
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -49,17 +51,17 @@ def router(state) -> Literal["call_tool", "continue", "__end__"]:
         return "continue"
 
 
-## Workflow Graph ------------------------------------------------------------------------
-workflow = StateGraph(AgentState)
+## CRM Workflow Graph ------------------------------------------------------------------------
+crm_workflow = StateGraph(AgentState)
 
 # add agent nodes
-for name, value in agent_metadata.items():
-    workflow.add_node(name, value['node'])
+name = "crm_agent"
+crm_workflow.add_node(name, agent_metadata[name]['node'])
     
-workflow.add_node("call_tool", tool_node)
+crm_workflow.add_node("call_tool", tool_node)
 
-workflow.add_conditional_edges(
-    "crm_agent",
+crm_workflow.add_conditional_edges(
+    name,
     router,
     {
         "call_tool": "call_tool",
@@ -68,53 +70,68 @@ workflow.add_conditional_edges(
         }
 )
 
-workflow.add_conditional_edges(
+crm_workflow.add_conditional_edges(
     "call_tool",
     # Each agent node updates the 'sender' field
     # the tool calling node does not, meaning
     # this edge will route back to the original agent
     # who invoked the tool
     lambda x: x["sender"],
-    {name:name for name in agent_names},
+    {name:name},
 )
 
-workflow.add_edge(START, "crm_agent")
+crm_workflow.add_edge(START, name)
 
 
-def format_chat_history_to_str(history:list[AIMessage|HumanMessage])->str:
-    history_str = ""
-    for chat in history:
-        if isinstance(chat, HumanMessage):
-            history_str += "Human: "+ chat.content.strip() + "\n"
-        if isinstance(chat, AIMessage):
-            history_str += "AI: "+ chat.content[:50].replace("\n","\t").strip() + "...\n"
+## creative_communication_agent Workflow Graph ------------------------------------------------------------------------
+creative_communication_workflow = StateGraph(AgentState)
+
+# add agent nodes
+name = "creative_communication_agent"
+creative_communication_workflow.add_node(name, agent_metadata[name]['node'])
     
-    if history_str:
-        return history_str
-    else:
-        return "--Empty chat history--"
+creative_communication_workflow.add_node("call_tool", tool_node)
+
+creative_communication_workflow.add_conditional_edges(
+    name,
+    router,
+    {
+        "call_tool": "call_tool",
+        "__end__": END,
+        "continue": END, 
+        }
+)
+
+creative_communication_workflow.add_conditional_edges(
+    "call_tool",
+    # Each agent node updates the 'sender' field
+    # the tool calling node does not, meaning
+    # this edge will route back to the original agent
+    # who invoked the tool
+    lambda x: x["sender"],
+    {name:name},
+)
+
+creative_communication_workflow.add_edge(START, name)
     
 
 def __submitMessage(
     input:str, 
+    workflow,
     user_id:str="test", 
     verbose:bool=False,
     recursion_limit:int=10
     ) -> str:
     
-    os.environ['CURRENT_USER_ID'] = user_id
-    
-    # memory only keep chat history only along agents.
-    internal_level_memory = MemorySaver()
-    graph = workflow.compile(checkpointer=internal_level_memory)
+    graph = workflow.compile()
 
     events = graph.stream(
         {
-            "messages": [input]
+            "messages": [f"user id: {user_id}", input],
             # "chat_history": input
         },
         # Maximum number of steps to take in the graph
-        {"recursion_limit": recursion_limit, "thread_id":"a"},
+        {"recursion_limit": recursion_limit},
     )
     
     if not verbose:
@@ -133,16 +150,38 @@ def __submitMessage(
     return response
 
 
+def format_chat_history_to_str(history:list[AIMessage|HumanMessage])->str:
+    history_str = ""
+    for chat in history:
+        if isinstance(chat, HumanMessage):
+            history_str += "Human: "+ chat.content.strip() + "\n"
+        if isinstance(chat, AIMessage):
+            history_str += "AI: "+ chat.content[:50].replace("\n","\t").strip() + "...\n"
+    
+    if history_str:
+        return history_str
+    else:
+        return "--Empty chat history--"
+
+
 def listening_chat_history_from_db(user_id:str, verbose=False):
     chat_history = load_chat_history(user_id=user_id)
     chat_history = format_chat_history_to_str(chat_history)
-    bot_response = __submitMessage(input=chat_history, user_id=user_id, verbose=verbose)
+    bot_response = __submitMessage(input=chat_history, workflow=crm_workflow, user_id=user_id, verbose=verbose)
 
     return bot_response
 
 
 def listening_chat_history(chat_history:list[AIMessage|HumanMessage], user_id:str, verbose=False):
     chat_history = format_chat_history_to_str(chat_history)
-    bot_response = __submitMessage(input=chat_history, user_id=user_id, verbose=verbose)
+    bot_response = __submitMessage(input=chat_history, workflow=crm_workflow, user_id=user_id, verbose=verbose)
 
+    return bot_response
+
+
+def create_personalized_ads(user_id:str, verbose=False):
+    persona = get_customer_information_by_id(user_id=user_id)
+    persona = str(persona)
+    bot_response = __submitMessage(input=persona, workflow=creative_communication_workflow, user_id=user_id, verbose=verbose)
+    ads_database.set(user_id=user_id, content=bot_response)
     return bot_response

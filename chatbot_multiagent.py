@@ -90,6 +90,7 @@ def submitUserMessage(
     os.environ['CURRENT_USER_ID'] = user_id
     
     chat_history = load_chat_history(user_id=user_id) if keep_chat_history else []
+    len_history = len(chat_history)
     chat_history = chat_history[-20:]
     
     # memory only keep chat history only along agents.
@@ -126,7 +127,9 @@ def submitUserMessage(
     
     if keep_chat_history:
         chat_history = save_chat_history(bot_message=response, human_message=user_input, user_id=user_id)
-        crm.listening_chat_history(chat_history[-2:], user_id=user_id)
+        if len_history%10==0:
+            crm.listening_chat_history(chat_history[-10:], user_id=user_id, verbose=verbose)
+            crm.create_personalized_ads(user_id=user_id, verbose=verbose)
     
     if return_reference:
         return response, get_tools_output()
