@@ -5,6 +5,10 @@ import requests
 import os
 from chatbot_multiagent import submitUserMessage
 import utils
+import line_bot
+from crm import push_ads
+
+push_ads.run_in_threads()
 
 utils.load_env()
 
@@ -33,7 +37,7 @@ async def webhook():
                     # Model Invoke
                     response = submitUserMessage(user_message, user_id=user_id, keep_chat_history=True, return_reference=False, verbose=BOT_VERBOSE)
                     response = utils.format_bot_response(response, markdown=False)
-                    PushMessage(reply_token, response)
+                    line_bot.ReplyMessage(reply_token, response)
             
             return request.json, 200
         
@@ -79,48 +83,7 @@ def health_check():
     except Exception as e:
         # If something goes wrong, return an error message
         return jsonify({"status": "unhealthy", "error": str(e)}), 500
-                
 
-def PushMessage(reply_token, TextMessage):
-    LINE_API = 'https://api.line.me/v2/bot/message/reply'
-    Authorization = f'Bearer {CHANNEL_ACCESS_TOKEN}'    
-    headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': Authorization
-    }
-    # remove * and # in message
-    answer = TextMessage
-    
-    if isinstance(answer, str):
-        data = {
-            "replyToken": reply_token,
-            "messages": [
-                {
-                "type": "text",
-                "text": answer,
-                },
-            ]
-        }
-    elif len(answer)<=5:
-        data = {
-            "replyToken": reply_token,
-            "messages": [
-                {
-                "type": "text",
-                "text": ans,
-                } for ans in answer
-            ]
-        }
-    else:
-        print("if you see this, something was wrong.")
-    
-    tools_outputs = ""
-
-    # Convert the dictionary to a JSON string
-    data = json.dumps(data)
-    
-    # Send the POST request to the LINE API
-    requests.post(LINE_API, headers=headers, data=data)
 
 # Run the Flask app
 if __name__ == '__main__':

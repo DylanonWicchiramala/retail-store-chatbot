@@ -50,3 +50,9 @@ def get(user_id: str):
     
     set(user_id=user_id, time_displayed=timestamp)
     return data
+
+
+def get_all_ads():
+    ads = ads_collection.find()
+
+    return list(ads)
