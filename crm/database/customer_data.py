@@ -6,7 +6,7 @@ import os
 
 class CustomerInformationInput(TypedDict):
     name: NotRequired[str]
-    age: NotRequired[int]
+    age: NotRequired[Literal["<16", "16-25", "25-40", "40-55", ">55"]]
     gender: NotRequired[str]
     special_occasions: NotRequired[str]
     price_sensitivity: NotRequired[str]
