@@ -2,11 +2,11 @@
 ## Document vector store for context
 from langchain_core.tools import tool
 ## For database search tool
-from crm.tools.customer_data import (
+from crm.database.customer_data import (
     get_customer_information_by_id,
     save_customer_information
 )
-from crm.tools.retail_store_data import (
+from crm.database.retail_store_data import (
     search_retail_store
 )
 

@@ -35,9 +35,9 @@ def save_customer_information(input_dict:CustomerInformationInput):
     
     client.close()
     
-    return get_customer_information()
+    return get_customer_information_by_id(user_id=CURRENT_USER_ID)
     
-## depre
+## deprecated
 def get_customer_information():
     """ this function to get customers persona data and interests into the databases.
     """
