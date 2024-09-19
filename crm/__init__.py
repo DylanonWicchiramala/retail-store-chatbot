@@ -26,10 +26,12 @@ from crm.agents import(
     agent_metadata,
     agent_names
 )
-import crm.ads_database as ads_database
+import crm.database.ads as ads
 from crm.tools import all_tools
-from crm.tools.customer_data import get_customer_information_by_id
-from crm.chat_history import load_chat_history
+from crm.database.customer_data import get_customer_information_by_id
+from crm.database.chat_history import load_chat_history
+from crm.ads_timing import save_user_active_time
+
 from langgraph.checkpoint.memory import MemorySaver
 
 ## Define Tool Node
@@ -165,6 +167,8 @@ def format_chat_history_to_str(history:list[AIMessage|HumanMessage])->str:
 
 
 def listening_chat_history_from_db(user_id:str, verbose=False):
+    """ Listening chat history from database then create a user personal data (such as hobbies, name, age, sex) in Customer database.
+    """
     chat_history = load_chat_history(user_id=user_id)
     chat_history = format_chat_history_to_str(chat_history)
     bot_response = __submitMessage(input=chat_history, workflow=crm_workflow, user_id=user_id, verbose=verbose)
@@ -173,6 +177,8 @@ def listening_chat_history_from_db(user_id:str, verbose=False):
 
 
 def listening_chat_history(chat_history:list[AIMessage|HumanMessage], user_id:str, verbose=False):
+    """ Listening chat history then create a user personal data (such as hobbies, name, age, sex) in Customer database.
+    """
     chat_history = format_chat_history_to_str(chat_history)
     bot_response = __submitMessage(input=chat_history, workflow=crm_workflow, user_id=user_id, verbose=verbose)
 
@@ -183,5 +189,5 @@ def create_personalized_ads(user_id:str, verbose=False):
     persona = get_customer_information_by_id(user_id=user_id)
     persona = str(persona)
     bot_response = __submitMessage(input=persona, workflow=creative_communication_workflow, user_id=user_id, verbose=verbose)
-    ads_database.set(user_id=user_id, content=bot_response)
+    ads.set(user_id=user_id, content=bot_response)
     return bot_response
