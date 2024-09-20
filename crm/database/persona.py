@@ -26,5 +26,41 @@ def create_persona(personas:list[dict], del_original:bool=True):
     return persona_collection
 
 
-def get_persona(user_id:str=None, persona_id:str=None):
-    pass
+def get_by_id(persona_id:str=None):
+    """ this function to get customers persona data and interests into the databases.
+    """
+    # get database
+    client, db = load_project_db()
+    persona_collection = db["Persona"]
+    
+    # Update the document in MongoDB
+    persona = persona_collection.find_one(
+        {"persona_id": persona_id.strip()}
+    )
+    
+    client.close()
+    
+    if persona:
+        return dict(persona)
+    else:
+        return 'No data'
+
+
+def get_all():
+    client, db = load_project_db()
+    persona_collection = db["Persona"]
+    
+    result = list(persona_collection.find())
+    
+    client.close()
+    return result
+
+
+def get_all_persona_ids():
+    persona = get_all()
+    
+    user_ids = []
+    for item in persona:
+        user_ids.append(item['persona_id'])
+    
+    return user_ids
