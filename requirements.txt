@@ -15,4 +15,5 @@ gunicorn
 pymongo==4.8.0
 flask-cors==5.0.0
 schedule==1.2.2
+scikit-learn==1.5.1
 numpy

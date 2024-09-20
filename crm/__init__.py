@@ -26,13 +26,20 @@ from crm.agents import(
     agent_metadata,
     agent_names
 )
-import crm.database.ads as ads
 from crm.tools import all_tools
-from crm.database.customer_data import get_customer_information_by_id
+import crm.database.ads as ads
+from crm.database.customer_data import get_customer_information_by_id, get_all_user_ids
 from crm.database.chat_history import load_chat_history
 from crm.ads_timing import save_user_active_time
+from crm.create_persona import pipeline as create_persona_pipeline
+from crm.push_ads import push_ads_pipeline
 
 from langgraph.checkpoint.memory import MemorySaver
+
+from datetime import datetime
+import schedule
+import time
+import threading
 
 ## Define Tool Node
 from langgraph.prebuilt import ToolNode
@@ -166,10 +173,10 @@ def format_chat_history_to_str(history:list[AIMessage|HumanMessage])->str:
         return "--Empty chat history--"
 
 
-def listening_chat_history_from_db(user_id:str, verbose=False):
+def listening_chat_history_from_db(user_id:str, after:datetime=None, verbose=False):
     """ Listening chat history from database then create a user personal data (such as hobbies, name, age, sex) in Customer database.
     """
-    chat_history = load_chat_history(user_id=user_id)
+    chat_history = load_chat_history(user_id=user_id, after=after)
     chat_history = format_chat_history_to_str(chat_history)
     bot_response = __submitMessage(input=chat_history, workflow=crm_workflow, user_id=user_id, verbose=verbose)
 
@@ -191,3 +198,43 @@ def create_personalized_ads(user_id:str, verbose=False):
     bot_response = __submitMessage(input=persona, workflow=creative_communication_workflow, user_id=user_id, verbose=verbose)
     ads.set(user_id=user_id, content=bot_response)
     return bot_response
+
+
+def crm_pipeline(after, verbose=False):
+    user_ids = get_all_user_ids()
+    
+    for user_id in user_ids:
+        listening_chat_history_from_db(ser_id=user_id, after=after, verbose=verbose)
+        create_personalized_ads(user_id=user_id, verbose=verbose)
+        save_user_active_time(user_id=user_id)
+    
+    create_persona_pipeline()
+
+    return
+   
+
+def schedule_crm_pipeline():
+    global last_run
+    last_run = None
+    def __crm_pipeline():
+        global last_run
+        crm_pipeline(last_run)
+        last_run = datetime.now()
+        
+    schedule.every().day.at("09:00", "Asia/Bangkok").do(__crm_pipeline)
+    
+    while True:
+        schedule.run_pending()  # Check if scheduled task is due
+        time.sleep(60)  # Wait before checking again
+        
+        
+
+def run_pipelines():
+    # Create a thread for the scheduling function
+    schedule_thread = threading.Thread(target=push_ads_pipeline)
+    schedule_thread.daemon = True  # Daemon threads exit when the main program exits
+    schedule_thread.start()
+    
+    schedule_thread = threading.Thread(target=schedule_crm_pipeline)
+    schedule_thread.daemon = True  # Daemon threads exit when the main program exits
+    schedule_thread.start()

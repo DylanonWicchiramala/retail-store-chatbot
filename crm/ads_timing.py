@@ -3,8 +3,6 @@ import datetime
 from collections import defaultdict
 from crm.utils import load_project_db
 
-user_id = "U9ba421923ad9e8b980900eb3eb6118d6"
-
 def get_user_chat_times(user_id):
     history = chat_history.load_chat_history(user_id=user_id, load_raw=True)["chat_history"]
 
@@ -37,7 +35,12 @@ def analyze_user_active_time(chat_time:list[datetime.datetime]):
         if data["frequency"] > 0:
             avg_seconds = data["total_seconds"] // data["frequency"]
             avg_time = datetime.timedelta(seconds=avg_seconds)
-            result[day]["average_time"] = str(avg_time)  # Convert timedelta to string (e.g., '10:30:00')
+            # Convert timedelta to hours and minutes
+            hours, remainder = divmod(avg_time.seconds, 3600)
+            minutes = remainder // 60
+
+            # Format it into HH:MM format
+            result[day]["average_time"] = f"{hours:02}:{minutes:02}"
         else:
             result[day]["average_time"] = "00:00:00"  # If no timestamps, default average to '00:00:00'
 
@@ -53,7 +56,6 @@ def save_user_active_time(user_id:str):
     
     chat_time = get_user_chat_times(user_id=user_id)
     active_time = analyze_user_active_time(chat_time)
-
     # get most active time
     most_active_time = dict(list(active_time.items())[:2])
 
@@ -77,3 +79,4 @@ def save_user_active_time(user_id:str):
     client.close()
 
 
+save_user_active_time("test")
