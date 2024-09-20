@@ -6,9 +6,9 @@ import os
 from chatbot_multiagent import submitUserMessage
 import utils
 import line_bot
-# crm pipeline
-from crm import push_ads
-push_ads.run_in_threads()
+import crm
+
+crm.run_pipelines()
 
 utils.load_env()
 
