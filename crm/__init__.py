@@ -203,27 +203,27 @@ def create_personalized_ads(user_id:str, verbose=False):
 
 def create_persona_ads(persona_id:str, verbose=False):
     persona = get_persona_by_id(persona_id=persona_id)
-    persona = str(persona)
-    bot_response = __submitMessage(input=persona, workflow=creative_communication_workflow, user_id=user_id, verbose=verbose)
+    persona_str = str(persona)
+    bot_response = __submitMessage(input=persona_str, workflow=creative_communication_workflow, user_id='No ID', verbose=verbose)
     # add ads to user matches persooa.
     for user_id in persona['members']:
         ads.set(user_id=user_id, content=bot_response)
     return bot_response
 
 
-def crm_pipeline(after, verbose=False):
+def crm_pipeline(after=None, verbose=False):
     user_ids = get_all_user_ids()
     
     for user_id in user_ids:
-        listening_chat_history_from_db(ser_id=user_id, after=after, verbose=verbose)
+        listening_chat_history_from_db(user_id=user_id, after=after, verbose=verbose)
         create_personalized_ads(user_id=user_id, verbose=verbose)
         save_user_active_time(user_id=user_id)
     
     # create ads for persona
     persona = create_persona_pipeline()
-    for items in persona.items():
+    for items in persona:
         persona_id = items['persona_id']
-        create_persona_ads(persona_id=persona_id)
+        # create_persona_ads(persona_id=persona_id)
 
     return
    
@@ -236,7 +236,7 @@ def schedule_crm_pipeline():
         crm_pipeline(last_run)
         last_run = datetime.now()
         
-    schedule.every().day.at("09:00", "Asia/Bangkok").do(__crm_pipeline)
+    schedule.every().day.at("09:00", tz = "Asia/Bangkok").do(__crm_pipeline)
     
     while True:
         schedule.run_pending()  # Check if scheduled task is due
