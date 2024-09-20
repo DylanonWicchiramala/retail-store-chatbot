@@ -109,6 +109,17 @@ def get_all():
     
     client.close()
     return result
+
+
+def get_all_user_ids():
+    user_data = get_all()
+    
+    user_ids = []
+    for item in user_data:
+        user_ids.append(item['user_id'])
+    
+    return user_ids
+
     
 ## deprecated
 # def get_customer_information():

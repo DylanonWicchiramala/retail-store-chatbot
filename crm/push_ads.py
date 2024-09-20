@@ -82,16 +82,16 @@ def schedule_run_pending():
         schedule.run_pending()  # Check if scheduled task is due
         time.sleep(60)  # Wait before checking again
         
-        
+
+def push_ads_pipeline():  
+    schedule_push_personal_ads_by_user_active_time(user_id="U9ba421923ad9e8b980900eb3eb6118d6")
+    schedule_run_pending()    
 
 
 def run_in_threads():
-    def run():
-        schedule_push_personal_ads_by_user_active_time(user_id="U9ba421923ad9e8b980900eb3eb6118d6")
-        schedule_run_pending()
         
     # Create a thread for the scheduling function
-    schedule_thread = threading.Thread(target=run)
+    schedule_thread = threading.Thread(target=push_ads_pipeline)
     schedule_thread.daemon = True  # Daemon threads exit when the main program exits
     schedule_thread.start()
 
