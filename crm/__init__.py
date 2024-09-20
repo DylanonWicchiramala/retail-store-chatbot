@@ -31,6 +31,7 @@ from crm.tools import all_tools
 from crm.database.customer_data import get_customer_information_by_id
 from crm.database.chat_history import load_chat_history
 from crm.ads_timing import save_user_active_time
+from crm.create_persona import pipeline as persona_pipeline
 
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -191,3 +192,7 @@ def create_personalized_ads(user_id:str, verbose=False):
     bot_response = __submitMessage(input=persona, workflow=creative_communication_workflow, user_id=user_id, verbose=verbose)
     ads.set(user_id=user_id, content=bot_response)
     return bot_response
+
+
+def pipeline():
+    pass
