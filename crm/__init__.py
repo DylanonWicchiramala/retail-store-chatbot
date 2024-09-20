@@ -30,6 +30,7 @@ from crm.tools import all_tools
 import crm.database.ads as ads
 from crm.database.customer_data import get_customer_information_by_id, get_all_user_ids
 from crm.database.chat_history import load_chat_history
+from crm.database.persona import get_by_id as get_persona_by_id, get_all_persona_ids
 from crm.ads_timing import save_user_active_time
 from crm.create_persona import pipeline as create_persona_pipeline
 from crm.push_ads import push_ads_pipeline
@@ -193,10 +194,20 @@ def listening_chat_history(chat_history:list[AIMessage|HumanMessage], user_id:st
 
 
 def create_personalized_ads(user_id:str, verbose=False):
-    persona = get_customer_information_by_id(user_id=user_id)
+    user_info = get_customer_information_by_id(user_id=user_id)
+    user_info = str(user_info)
+    bot_response = __submitMessage(input=user_info, workflow=creative_communication_workflow, user_id=user_id, verbose=verbose)
+    ads.set(user_id=user_id, content=bot_response)
+    return bot_response
+
+
+def create_persona_ads(persona_id:str, verbose=False):
+    persona = get_persona_by_id(persona_id=persona_id)
     persona = str(persona)
     bot_response = __submitMessage(input=persona, workflow=creative_communication_workflow, user_id=user_id, verbose=verbose)
-    ads.set(user_id=user_id, content=bot_response)
+    # add ads to user matches persooa.
+    for user_id in persona['members']:
+        ads.set(user_id=user_id, content=bot_response)
     return bot_response
 
 
@@ -208,7 +219,11 @@ def crm_pipeline(after, verbose=False):
         create_personalized_ads(user_id=user_id, verbose=verbose)
         save_user_active_time(user_id=user_id)
     
-    create_persona_pipeline()
+    # create ads for persona
+    persona = create_persona_pipeline()
+    for items in persona.items():
+        persona_id = items['persona_id']
+        create_persona_ads(persona_id=persona_id)
 
     return
    
