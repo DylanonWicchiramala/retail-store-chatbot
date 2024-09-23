@@ -61,8 +61,7 @@ def schedule_push_personal_ads_by_user_active_time(user_id:str=None, push_all:bo
         if len(active_times)>0:
             for active_time in active_times:
                 days, time = active_time
-                # schedule_push_personal_ads(user_id=user_id, days=days, at=time)
-                schedule_push_personal_ads(user_id=user_id, days="monday", at='11:40')
+                schedule_push_personal_ads(user_id=user_id, days=days, at=time)
         # if no user active time data found
         else:
             schedule_push_personal_ads(user_id=user_id)
