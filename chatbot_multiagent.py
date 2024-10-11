@@ -26,7 +26,6 @@ from langgraph.checkpoint.memory import MemorySaver
 
 from tools import get_tools_output, all_tools
 from chat_history import save_chat_history, load_chat_history
-import crm
 ## Define Tool Node
 from langgraph.prebuilt import ToolNode
 from typing import Literal
@@ -127,9 +126,6 @@ def submitUserMessage(
     
     if keep_chat_history:
         chat_history = save_chat_history(bot_message=response, human_message=user_input, user_id=user_id)
-        if len_history%10==0:
-            crm.listening_chat_history(chat_history[-10:], user_id=user_id, verbose=verbose)
-            crm.create_personalized_ads(user_id=user_id, verbose=verbose)
     
     if return_reference:
         return response, get_tools_output()

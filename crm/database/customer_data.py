@@ -10,10 +10,12 @@ class CustomerInformationInput(TypedDict):
     age: NotRequired[Literal["<16", "16-25", "25-40", "40-55", ">55"]]
     gender: NotRequired[str]
     special_occasions: NotRequired[str]
-    price_sensitivity: NotRequired[str]
+    price_sensitivity: NotRequired[Literal["sensitive", "medium", "non-sensitive"]]
     hobbies_interests: NotRequired[str]
+    needs_wants: NotRequired[str]
     preferred_products_categories: NotRequired[str]
     preferred_brands: NotRequired[str]
+    marital_status: NotRequired[Literal["marriage", "never married", "divorced", "widowed", "separated"]]
 
 
 def save_customer_information(input_dict:CustomerInformationInput):

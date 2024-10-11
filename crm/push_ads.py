@@ -77,15 +77,11 @@ def schedule_push_personal_ads_by_user_active_time(user_id:str=None, push_all:bo
             push_ads(user_id=user_id)
 
 
-def schedule_run_pending():
+def push_ads_pipeline():  
+    schedule_push_personal_ads_by_user_active_time(user_id="U9ba421923ad9e8b980900eb3eb6118d6")
     while True:
         schedule.run_pending()  # Check if scheduled task is due
         time.sleep(60)  # Wait before checking again
-        
-
-def push_ads_pipeline():  
-    schedule_push_personal_ads_by_user_active_time(user_id="U9ba421923ad9e8b980900eb3eb6118d6")
-    schedule_run_pending()    
 
 
 def run_in_threads():
