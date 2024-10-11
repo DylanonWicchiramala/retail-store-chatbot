@@ -8,8 +8,6 @@ import utils
 import line_bot
 import crm
 
-crm.run_pipelines()
-
 utils.load_env()
 
 app = Flask(__name__)
@@ -87,4 +85,5 @@ def health_check():
 
 # Run the Flask app
 if __name__ == '__main__':
+    crm.run_pipelines()
     app.run(port=8080, debug=True)

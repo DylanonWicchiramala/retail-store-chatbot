@@ -1,6 +1,6 @@
-# from os.path import dirname, realpath, sep, pardir, curdir
-# import sys
-# sys.path.append(dirname(realpath(__file__)) + sep + pardir)
+from os.path import dirname, realpath, sep, pardir, curdir
+import sys
+sys.path.append(dirname(realpath(__file__)) + sep + pardir)
 
 # load env ------------------------------------------------------------------------
 import os
@@ -26,7 +26,7 @@ from crm.agents import(
     agent_metadata,
     agent_names
 )
-from crm.tools import all_tools
+from crm.tools import all_tools, set_current_user_id
 import crm.database.ads as ads
 from crm.database.customer_data import get_customer_information_by_id, get_all_user_ids
 from crm.database.chat_history import load_chat_history
@@ -133,6 +133,8 @@ def __submitMessage(
     recursion_limit:int=10
     ) -> str:
     
+    set_current_user_id(user_id=user_id)
+    
     graph = workflow.compile()
 
     events = graph.stream(
@@ -211,10 +213,11 @@ def create_persona_ads(persona_id:str, verbose=False):
     return bot_response
 
 
-def crm_pipeline(after=None, verbose=False):
+def crm_pipeline(verbose=False):
     user_ids = get_all_user_ids()
     
     for user_id in user_ids:
+        after = get_customer_information_by_id(user_id).get("latest_update")
         listening_chat_history_from_db(user_id=user_id, after=after, verbose=verbose)
         create_personalized_ads(user_id=user_id, verbose=verbose)
         save_user_active_time(user_id=user_id)
@@ -229,12 +232,8 @@ def crm_pipeline(after=None, verbose=False):
    
 
 def schedule_crm_pipeline():
-    global last_run
-    last_run = None
     def __crm_pipeline():
-        global last_run
-        crm_pipeline(last_run)
-        last_run = datetime.now()
+        crm_pipeline(verbose=True)
         
     schedule.every().day.at("09:00", tz = "Asia/Bangkok").do(__crm_pipeline)
     
