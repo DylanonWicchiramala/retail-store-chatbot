@@ -55,7 +55,7 @@ def schedule_push_personal_ads(
     schedule_every[days].at(at, timezone).do(push_ads)
     
 
-def schedule_push_personal_ads_by_user_active_time(user_id:str=None, push_all:bool=False):
+def push_personal_ads_by_user_active_time(user_id:str=None, push_all:bool=False):
     
     def push_ads(user_id):
         personal = customer_data.get_customer_information_by_id(user_id=user_id)
@@ -85,30 +85,11 @@ def schedule_push_personal_ads_by_user_active_time(user_id:str=None, push_all:bo
 
 
 def push_ads_pipeline():  
-    schedule_push_personal_ads_by_user_active_time(push_all=True)
+    push_personal_ads_by_user_active_time(push_all=True)
     while True:
         schedule.run_pending()  # Check if scheduled task is due
         time.sleep(60)  # Wait before checking again
         
 
 def push_ads_pipeline_test():  
-    schedule_push_personal_ads_by_user_active_time(user_id="")
-    while True:
-        schedule.run_pending()  # Check if scheduled task is due
-        time.sleep(60)  # Wait before checking again
-
-
-def run_in_threads():
-        
-    # Create a thread for the scheduling function
-    schedule_thread = threading.Thread(target=push_ads_pipeline)
-    schedule_thread.daemon = True  # Daemon threads exit when the main program exits
-    schedule_thread.start()
-    
-    schedule_thread_test = threading.Thread(target=push_ads_pipeline)
-    schedule_thread_test.daemon = True  # Daemon threads exit when the main program exits
-    schedule_thread_test.start()
-
-
-if __name__ == "__main__":
-    run_in_threads()
+    push_personal_ads(user_id="U9ba421923ad9e8b980900eb3eb6118d6")

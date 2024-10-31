@@ -1,3 +1,4 @@
+import traceback
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
 import json
@@ -40,7 +41,8 @@ async def webhook():
             return request.json, 200
         
         except Exception as e:
-            app.logger.error(f"Error: {e}")
+            error_traceback = traceback.format_exc()
+            app.logger.error(f"Error: {e}\nTraceback: {error_traceback}")
             return jsonify({"error": str(e)}), 500
     else:
         return jsonify({"error": "method not allowed"}), 400
@@ -68,7 +70,8 @@ def chatbot_test():
         return jsonify({"response": response})
 
     except Exception as e:
-        app.logger.error(f"Error: {e}")
+        error_traceback = traceback.format_exc()
+        app.logger.error(f"Error: {e}\nTraceback: {error_traceback}")
         return jsonify({"error": f"{e}"}), 500
         
         
@@ -79,11 +82,22 @@ def health_check():
         # For now, we just return a simple success message
         return jsonify({"status": "healthy"}), 200
     except Exception as e:
-        # If something goes wrong, return an error message
+        error_traceback = traceback.format_exc()
+        app.logger.error(f"Error: {e}\nTraceback: {error_traceback}")
         return jsonify({"status": "unhealthy", "error": str(e)}), 500
+    
+
+@app.route('/run-automate', methods=['GET'])
+def run_automate():
+    try:
+        crm.run_pipelines()
+        return jsonify({"status": "success"}), 200
+    except Exception as e:
+        error_traceback = traceback.format_exc()
+        app.logger.error(f"Error: {e}\nTraceback: {error_traceback}")
+        return jsonify({"error": str(e), "traceback": error_traceback}), 500
 
 
 # Run the Flask app
 if __name__ == '__main__':
-    crm.run_pipelines()
     app.run(port=8080, debug=True)
