@@ -85,7 +85,7 @@ def schedule_push_personal_ads_by_user_active_time(user_id:str=None, push_all:bo
 
 
 def push_ads_pipeline():  
-    schedule_push_personal_ads_by_user_active_time(user_id="U9ba421923ad9e8b980900eb3eb6118d6")
+    schedule_push_personal_ads_by_user_active_time(push_all=True)
     while True:
         schedule.run_pending()  # Check if scheduled task is due
         time.sleep(60)  # Wait before checking again
