@@ -1,4 +1,5 @@
 # %%
+from deprecated import deprecated
 from crm.database import ads, customer_data
 import line_bot
 from datetime import datetime
@@ -30,6 +31,7 @@ def push_personal_ads(user_id:str=None, push_all:bool=False):
             send_ad(user_id=user_id)
 
 
+@deprecated("use if statement checking instead")
 def schedule_push_personal_ads(
     user_id:str=None, 
     push_all:bool=False, 
@@ -58,13 +60,18 @@ def schedule_push_personal_ads_by_user_active_time(user_id:str=None, push_all:bo
     def push_ads(user_id):
         personal = customer_data.get_customer_information_by_id(user_id=user_id)
         active_times = personal.get('active_time', [])
+        today = datetime.today()
         if len(active_times)>0:
             for active_time in active_times:
                 days, time = active_time
-                schedule_push_personal_ads(user_id=user_id, days=days, at="10:00")
+                
+                # check if todays are most user active days.
+                this_days = today.strftime('%A').lower()
+                if this_days == days:
+                    push_personal_ads(user_id)
         # if no user active time data found
         else:
-            schedule_push_personal_ads(user_id=user_id)
+            push_personal_ads(user_id)
             
     if user_id:
         push_ads(user_id=user_id)
