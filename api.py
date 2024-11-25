@@ -38,8 +38,9 @@ async def webhook():
                 
                 
                 # Get reply token (reply in 1 min)
-                reply_token = event['replyToken']                        
-                if event['type'] == 'message':
+                reply_token = event['replyToken']     
+                bot_response_enable = user_config.__get({"user_id":user_id})[0]['enable_bot_response']
+                if event['type'] == 'message' and bot_response_enable:
                     user_message = event["message"]["text"]
                     # Model Invoke
                     response = submitUserMessage(user_message, user_id=user_id, keep_chat_history=True, return_reference=False, verbose=BOT_VERBOSE)
