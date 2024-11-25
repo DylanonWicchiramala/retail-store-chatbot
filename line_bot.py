@@ -4,6 +4,7 @@ import requests
 import os
 import utils
 import uuid
+from typing import Literal
 
 utils.load_env()
 
@@ -12,14 +13,30 @@ CHANNEL_SECRET = os.environ.get("LINE_SECRET")
 BOT_VERBOSE = int(os.environ['BOT_VERBOSE'])
 
 
-def ReplyMessage(reply_token, TextMessage:list|str):
-    LINE_API = 'https://api.line.me/v2/bot/message/reply'
+def __use_line_api(url_endpoint:str, data:dict=None, method:Literal['get', 'post']="post"):
+    LINE_API = url_endpoint
     Authorization = f'Bearer {CHANNEL_ACCESS_TOKEN}'    
     headers = {
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': Authorization
+        'Authorization': Authorization,
+        'X-Line-Retry-Key': str(uuid.uuid4())  # Generate a unique UUID
     }
-    # remove * and # in message
+    
+    # Convert the dictionary to a JSON string
+    data = json.dumps(data)
+    
+    # Send the POST request to the LINE API
+    if method == 'post':
+        response = requests.post(LINE_API, headers=headers, data=data)
+    elif method == 'get':  # For GET requests, we don't need to pass data in the request body.
+        response = requests.get(LINE_API, headers=headers, data=data)
+    
+    return response
+
+
+def ReplyMessage(reply_token, TextMessage:list|str):
+    LINE_API = 'https://api.line.me/v2/bot/message/reply'
+    
     answer = TextMessage
     
     if isinstance(answer, str):
@@ -45,27 +62,33 @@ def ReplyMessage(reply_token, TextMessage:list|str):
     elif len(answer)>5:
         raise ValueError("List of TextMessage must have length less than 5")
     
-    # Convert the dictionary to a JSON string
-    data = json.dumps(data)
+    return __use_line_api(LINE_API, data)
+
+
+def ReplyMessageWithImage(reply_token, text:str, image:str):
+    LINE_API = 'https://api.line.me/v2/bot/message/reply'
     
-    # Send the POST request to the LINE API
-    response = requests.post(LINE_API, headers=headers, data=data)
+    data = {
+        "replyToken": reply_token,
+        "messages": [
+            {
+            "type": "image",
+            "originalContentUrl": image,
+            "previewImageUrl": image
+            },
+            {
+            "type": "text",
+            "text": text,
+            },
+        ]
+    }
     
-    return response
+    return __use_line_api(LINE_API, data)
     
 
 def PushMessage(user_id:str, TextMessage:list|str):
-
     # Define the endpoint URL
     LINE_API = "https://api.line.me/v2/bot/message/push"
-    Authorization = f'Bearer {CHANNEL_ACCESS_TOKEN}' 
-
-    # Define the headers
-    headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': Authorization,
-        'X-Line-Retry-Key': str(uuid.uuid4())  # Generate a unique UUID
-    }
 
     # Define the payload (data to send in the POST request)
     if isinstance(TextMessage, str):
@@ -91,7 +114,4 @@ def PushMessage(user_id:str, TextMessage:list|str):
     elif len(TextMessage)>5:
         raise ValueError("List of TextMessage must have length less than 5")
 
-    # Send the POST request
-    response = requests.post(LINE_API, headers=headers, json=data)
-
-    return response
+    return __use_line_api(LINE_API, data)

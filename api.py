@@ -1,10 +1,11 @@
 import traceback
-from flask import Flask, request, abort, jsonify
+from flask import Flask, redirect, render_template, request, abort, jsonify, url_for
 from flask_cors import CORS
 import json
 import requests
 import os
 from chatbot_multiagent import submitUserMessage
+from database import load_db, user_config, user_profile
 import utils
 import line_bot
 import crm
@@ -29,6 +30,13 @@ async def webhook():
             # Check Event (can be multiple event)
             for event in payload['events']:
                 user_id = event["source"]["userId"]
+                # set user profile and default config
+                user_profile.update_pipeline(user_id)
+                # user config default setting
+                if not len(user_config.__get({"user_id":user_id})):
+                    user_config.set(user_id)
+                
+                
                 # Get reply token (reply in 1 min)
                 reply_token = event['replyToken']                        
                 if event['type'] == 'message':
@@ -96,6 +104,62 @@ def run_automate():
         error_traceback = traceback.format_exc()
         app.logger.error(f"Error: {e}\nTraceback: {error_traceback}")
         return jsonify({"error": str(e), "traceback": error_traceback}), 500
+
+
+@app.route('/admin-console')
+async def admin_console():
+    # Get user profiles from the database.
+    client, db = load_db()
+
+    user_profile = db['User Profile']
+
+    users = user_profile.aggregate([
+        {
+            '$lookup': {
+                'from': 'User Config',          # Name of the collection to join with
+                'localField': 'user_id',        # Field in the `User Profile` collection
+                'foreignField': 'user_id',      # Field in the `User Config` collection
+                'as': 'User Config'             # Alias for the output array
+            }
+        },
+        {
+            '$unwind': {                       # Unwind the joined array to create a flat structure
+                'path': '$User Config',
+                'preserveNullAndEmptyArrays': True  # Keeps users without matching 'User Config'
+            }
+        },
+        {
+            '$replaceRoot': {                  # Merge the 'User Config' data to the top level
+                'newRoot': {
+                    '$mergeObjects': ['$User Config', '$$ROOT']
+                }
+            }
+        },
+        {
+            '$project': {                     # Remove the nested 'User Config' after merging
+                'User Config': 0
+            }
+        }
+    ])
+
+    users = list(users)
+
+    client.close()
+
+    # Now `users` will be a list of flat dictionaries containing fields from both collections.
+    
+    return render_template('admin_console.html', users=users)
+
+
+@app.route('/toggle/<user_id>', methods=['POST'])
+async def toggle_user(user_id):
+    # Get the current state from the form.
+    enable_bot_response = request.form.get('enable_bot_response') == 'on'
+    
+    # Update the user configuration in the database.
+    user_config.set(user_id, {"enable_bot_response": enable_bot_response})
+    
+    return redirect(url_for('admin_console'))    
 
 
 # Run the Flask app
