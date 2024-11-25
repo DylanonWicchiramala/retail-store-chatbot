@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Console</title>
+</head>
+<body>
+    <h1>User List</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Profile Picture</th>
+                <th>Display Name</th>
+                <th>Enable Bot Response</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>
+                    <img src="{{ user.picture_url }}" alt="Profile Picture" width="50" height="50">
+                </td>
+                <td>{{ user.display_name }}</td>
+                <td>
+                    <form action="{{ url_for('toggle_user', user_id=user.user_id) }}" method="post">
+                        <input type="checkbox" name="enable_bot_response"
+                        onchange="this.form.submit()" 
+                        {% if user.enable_bot_response %}checked{% endif %}>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

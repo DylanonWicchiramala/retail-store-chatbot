@@ -1,6 +1,9 @@
-# from os.path import dirname, realpath, sep, pardir, curdir
-# import sys
-# sys.path.append(dirname(realpath(__file__)) + sep + pardir)
+from os.path import dirname, realpath, sep, pardir, curdir
+import sys
+from tabnanny import verbose
+
+from deprecated import deprecated
+sys.path.append(dirname(realpath(__file__)) + sep + pardir)
 
 # load env ------------------------------------------------------------------------
 import os
@@ -26,14 +29,14 @@ from crm.agents import(
     agent_metadata,
     agent_names
 )
-from crm.tools import all_tools
+from crm.tools import all_tools, set_current_user_id
 import crm.database.ads as ads
 from crm.database.customer_data import get_customer_information_by_id, get_all_user_ids
 from crm.database.chat_history import load_chat_history
 from crm.database.persona import get_by_id as get_persona_by_id, get_all_persona_ids
 from crm.ads_timing import save_user_active_time
 from crm.create_persona import pipeline as create_persona_pipeline
-from crm.push_ads import push_ads_pipeline
+from crm.push_ads import push_ads_pipeline, push_ads_pipeline_test
 
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -133,6 +136,8 @@ def __submitMessage(
     recursion_limit:int=10
     ) -> str:
     
+    set_current_user_id(user_id=user_id)
+    
     graph = workflow.compile()
 
     events = graph.stream(
@@ -211,10 +216,11 @@ def create_persona_ads(persona_id:str, verbose=False):
     return bot_response
 
 
-def crm_pipeline(after=None, verbose=False):
+def crm_pipeline(verbose=True):
     user_ids = get_all_user_ids()
     
     for user_id in user_ids:
+        after = get_customer_information_by_id(user_id).get("latest_update")
         listening_chat_history_from_db(user_id=user_id, after=after, verbose=verbose)
         create_personalized_ads(user_id=user_id, verbose=verbose)
         save_user_active_time(user_id=user_id)
@@ -227,14 +233,10 @@ def crm_pipeline(after=None, verbose=False):
 
     return
    
-
+@deprecated("use google cloud scheduler.")
 def schedule_crm_pipeline():
-    global last_run
-    last_run = None
     def __crm_pipeline():
-        global last_run
-        crm_pipeline(last_run)
-        last_run = datetime.now()
+        crm_pipeline(verbose=True)
         
     schedule.every().day.at("09:00", tz = "Asia/Bangkok").do(__crm_pipeline)
     
@@ -242,14 +244,18 @@ def schedule_crm_pipeline():
         schedule.run_pending()  # Check if scheduled task is due
         time.sleep(60)  # Wait before checking again
         
-        
 
 def run_pipelines():
     # Create a thread for the scheduling function
-    schedule_thread = threading.Thread(target=push_ads_pipeline)
-    schedule_thread.daemon = True  # Daemon threads exit when the main program exits
-    schedule_thread.start()
+    ads_thread = threading.Thread(target=push_ads_pipeline)
+    ads_thread.daemon = True  # Daemon threads exit when the main program exits
+    ads_thread.start()
     
-    schedule_thread = threading.Thread(target=schedule_crm_pipeline)
-    schedule_thread.daemon = True  # Daemon threads exit when the main program exits
-    schedule_thread.start()
+    ads_thread_test = threading.Thread(target=push_ads_pipeline_test)
+    ads_thread_test.daemon = True  # Daemon threads exit when the main program exits
+    ads_thread_test.start()
+    
+    crm_thread = threading.Thread(target=crm_pipeline)
+    crm_thread.daemon = True  # Daemon threads exit when the main program exits
+    crm_thread.start()
+    

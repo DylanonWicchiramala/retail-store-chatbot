@@ -47,8 +47,7 @@ def load_chat_history(chat_history: list = [], after: datetime = None, user_id: 
             
             # Only process messages that have a timestamp and are after the provided 'after' datetime
             if timestamp and after:
-                msg_time = datetime.fromisoformat(timestamp[:-1])  # Convert ISO format to datetime
-                if msg_time <= after:
+                if timestamp <= after:
                     continue  # Skip messages older than the 'after' timestamp
 
             # Append filtered messages to chat history

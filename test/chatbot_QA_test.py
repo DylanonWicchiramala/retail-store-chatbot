@@ -88,8 +88,8 @@ def API_test(quesion_test:list[str], result_save_path='test/testset/api_QA_test_
 with open('./test/testset/user_question_testsets.txt', 'r') as file:
     quesion_test = file.readlines()    
 
-endpoint="https://retail-store-chatbot-212399072243.asia-east1.run.app/test"
-# endpoint="http://127.0.0.1:8080/test"
+# endpoint="https://retail-store-chatbot-212399072243.asia-east1.run.app/test"
+endpoint="http://127.0.0.1:8080/test"
 
-results, exet_rept = QA_sample_test(quesion_test, num_samples=10, result_save_path="test/testset/QA_test_result.txt"); utils.notify("aurora")
-# results, exet_rept = API_test(quesion_test, num_samples=10, result_save_path='test/testset/api_QA_test_result.txt', endpoint=endpoint); utils.notify("aurora")
+# results, exet_rept = QA_sample_test(quesion_test, num_samples=10, result_save_path="test/testset/QA_test_result.txt"); utils.notify("aurora")
+results, exet_rept = API_test(quesion_test, num_samples=10, result_save_path='test/testset/api_QA_test_result.txt', endpoint=endpoint); utils.notify("aurora")

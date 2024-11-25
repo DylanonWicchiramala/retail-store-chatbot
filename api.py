@@ -1,14 +1,14 @@
-from flask import Flask, request, abort, jsonify
+import traceback
+from flask import Flask, redirect, render_template, request, abort, jsonify, url_for
 from flask_cors import CORS
 import json
 import requests
 import os
 from chatbot_multiagent import submitUserMessage
+from database import load_db, user_config, user_profile
 import utils
 import line_bot
 import crm
-
-crm.run_pipelines()
 
 utils.load_env()
 
@@ -30,9 +30,17 @@ async def webhook():
             # Check Event (can be multiple event)
             for event in payload['events']:
                 user_id = event["source"]["userId"]
+                # set user profile and default config
+                user_profile.update_pipeline(user_id)
+                # user config default setting
+                if not len(user_config.__get({"user_id":user_id})):
+                    user_config.set(user_id)
+                
+                
                 # Get reply token (reply in 1 min)
-                reply_token = event['replyToken']                        
-                if event['type'] == 'message':
+                reply_token = event['replyToken']     
+                bot_response_enable = user_config.__get({"user_id":user_id})[0]['enable_bot_response']
+                if event['type'] == 'message' and bot_response_enable:
                     user_message = event["message"]["text"]
                     # Model Invoke
                     response = submitUserMessage(user_message, user_id=user_id, keep_chat_history=True, return_reference=False, verbose=BOT_VERBOSE)
@@ -42,7 +50,8 @@ async def webhook():
             return request.json, 200
         
         except Exception as e:
-            app.logger.error(f"Error: {e}")
+            error_traceback = traceback.format_exc()
+            app.logger.error(f"Error: {e}\nTraceback: {error_traceback}")
             return jsonify({"error": str(e)}), 500
     else:
         return jsonify({"error": "method not allowed"}), 400
@@ -70,7 +79,8 @@ def chatbot_test():
         return jsonify({"response": response})
 
     except Exception as e:
-        app.logger.error(f"Error: {e}")
+        error_traceback = traceback.format_exc()
+        app.logger.error(f"Error: {e}\nTraceback: {error_traceback}")
         return jsonify({"error": f"{e}"}), 500
         
         
@@ -81,8 +91,76 @@ def health_check():
         # For now, we just return a simple success message
         return jsonify({"status": "healthy"}), 200
     except Exception as e:
-        # If something goes wrong, return an error message
+        error_traceback = traceback.format_exc()
+        app.logger.error(f"Error: {e}\nTraceback: {error_traceback}")
         return jsonify({"status": "unhealthy", "error": str(e)}), 500
+    
+
+@app.route('/run-automate', methods=['GET'])
+def run_automate():
+    try:
+        crm.run_pipelines()
+        return jsonify({"status": "success"}), 200
+    except Exception as e:
+        error_traceback = traceback.format_exc()
+        app.logger.error(f"Error: {e}\nTraceback: {error_traceback}")
+        return jsonify({"error": str(e), "traceback": error_traceback}), 500
+
+
+@app.route('/admin-console')
+async def admin_console():
+    # Get user profiles from the database.
+    client, db = load_db()
+
+    user_profile = db['User Profile']
+
+    users = user_profile.aggregate([
+        {
+            '$lookup': {
+                'from': 'User Config',          # Name of the collection to join with
+                'localField': 'user_id',        # Field in the `User Profile` collection
+                'foreignField': 'user_id',      # Field in the `User Config` collection
+                'as': 'User Config'             # Alias for the output array
+            }
+        },
+        {
+            '$unwind': {                       # Unwind the joined array to create a flat structure
+                'path': '$User Config',
+                'preserveNullAndEmptyArrays': True  # Keeps users without matching 'User Config'
+            }
+        },
+        {
+            '$replaceRoot': {                  # Merge the 'User Config' data to the top level
+                'newRoot': {
+                    '$mergeObjects': ['$User Config', '$$ROOT']
+                }
+            }
+        },
+        {
+            '$project': {                     # Remove the nested 'User Config' after merging
+                'User Config': 0
+            }
+        }
+    ])
+
+    users = list(users)
+
+    client.close()
+
+    # Now `users` will be a list of flat dictionaries containing fields from both collections.
+    
+    return render_template('admin_console.html', users=users)
+
+
+@app.route('/toggle/<user_id>', methods=['POST'])
+async def toggle_user(user_id):
+    # Get the current state from the form.
+    enable_bot_response = request.form.get('enable_bot_response') == 'on'
+    
+    # Update the user configuration in the database.
+    user_config.set(user_id, {"enable_bot_response": enable_bot_response})
+    
+    return redirect(url_for('admin_console'))    
 
 
 # Run the Flask app

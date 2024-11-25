@@ -1,4 +1,6 @@
 import os
+from database import load_db
+import database
 import utils
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -11,9 +13,10 @@ from datetime import datetime, timedelta
 utils.load_env()
 
 # Connect to the "RetailStore" database
-client, db = utils.load_project_db()
-db = client["RetailStore"]
-history = db["Chat History"]
+client, db = load_db()
+COLLECTION_NAME = "Chat History"
+history = db[COLLECTION_NAME]
+
 
 
 def save_chat_history(bot_message:str, human_message:str, user_id: str = "test"):
@@ -51,6 +54,16 @@ def load_chat_history(chat_history:list=[], user_id:str="test"):
         )
     
     return chat_history
+
+
+def find(query, *args, **kwargs):
+    client, db = database.load_db()
+    history = db[COLLECTION_NAME]
+    
+    result = list(history.find(query, *args, **kwargs))
+    
+    client.close()
+    return result
 
 
 def delete_chat_history(user_id=None, time_before=None, delete_all=False):

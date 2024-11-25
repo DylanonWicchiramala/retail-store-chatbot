@@ -1,3 +1,4 @@
+from deprecated import deprecated
 from dotenv import load_dotenv as __load_dotenv
 import os
 import json
@@ -74,6 +75,7 @@ def bundle_input(func):
     return wrapper
 
 
+@deprecated("use database.load_db instead.")
 def load_project_db():
     load_env()
     

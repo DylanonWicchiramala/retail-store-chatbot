@@ -1,7 +1,7 @@
 ## For database search tool
 from langchain_openai import OpenAIEmbeddings
-from tools.mongodb_search import similarity_search
-from utils import load_project_db
+from crm.tools.mongodb_search import similarity_search
+from crm.utils import load_project_db
 
 #! Retriever
 embedding = OpenAIEmbeddings(model="text-embedding-3-small")
