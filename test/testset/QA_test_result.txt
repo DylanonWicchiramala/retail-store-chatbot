@@ -54,7 +54,7 @@ answer:
 **ชื่อร้าน:** Central Pinklao  
 **ที่อยู่:** 7/222 Borommaratchachonnani Rd, Arun Amarin, Bangkok 10700  
 **เบอร์โทรศัพท์:** +1122334455  
-**อีเมล:** centralpinklao@example.com  
+**อีเมล:** centralpinklao@example.com   
 
 #### สินค้าที่มีจำหน่าย:
 
