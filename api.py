@@ -152,6 +152,18 @@ async def admin_console():
     return render_template('admin_console.html', users=users)
 
 
+@app.route('/change-store-name/<name>', methods=['POST'])
+async def change_store(name):
+    """ change env. STORE_NAME to name
+    """
+    try:
+        os.environ['STORE_NAME'] = name
+        return jsonify({"status": "success"}), 200
+    except Exception as e:
+        app.logger.error(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/toggle/<user_id>', methods=['POST'])
 async def toggle_user(user_id):
     # Get the current state from the form.
